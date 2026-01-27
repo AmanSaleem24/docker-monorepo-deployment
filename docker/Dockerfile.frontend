@@ -15,7 +15,9 @@ RUN bun install
 
 RUN bun run db:generate
 
-RUN DATABASE_URL=${DATABASE_URL} bun run build
+# Use BuildKit secret mount
+RUN --mount=type=secret,id=database_url \
+    DATABASE_URL=$(cat /run/secrets/database_url) bun run build
 
 EXPOSE 3000
 

@@ -1,4 +1,4 @@
-name: Deploy Backend
+name: Deploy WebSocket
 on:
     push:
         branches: [ main ]

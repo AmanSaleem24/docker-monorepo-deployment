@@ -19,9 +19,11 @@ jobs:
             uses: docker/build-push-action@v4
             with:
               context: .
-              file: ./docker/Dockerfile.backend
+              file: ./docker/Dockerfile.frontend
+              build-args: |
+                DATABASE_URL=${{ secrets.DATABASE_URL }}
               push: true
-              tags: amansaleem24/todo-app-backend:${{ github.sha }}
+              tags: amansaleem24/todo-app-frontend:${{ github.sha }}
 
             
 

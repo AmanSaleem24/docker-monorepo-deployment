@@ -1,69 +1,26 @@
-# FROM oven/bun:latest
-
-# WORKDIR /usr/app/src
-
-# ARG DATABASE_URL
-# COPY ./packages ./packages
-# COPY ./bun.lock ./bun.lock
-
-# COPY ./package.json ./package.json
-# COPY ./turbo.json ./turbo.json
-
-# COPY ./apps/web ./apps/web
-
-# RUN bun install
-
-# RUN bun run db:generate
-
-# RUN DATABASE_URL=${DATABASE_URL} bun run build
-
-# EXPOSE 3000
-
-# CMD ["bun", "run", "start:web"]
-
-
-# Build stage with Node.js
-FROM node:20-slim AS builder
-
-WORKDIR /usr/app/src
-
-ARG DATABASE_URL
-ENV DATABASE_URL=${DATABASE_URL}
-
-# Install dependencies including unzip for Bun
-RUN apt-get update -y && \
-    apt-get install -y openssl curl unzip && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install Bun
-RUN curl -fsSL https://bun.sh/install | bash
-ENV PATH="/root/.bun/bin:${PATH}"
-
-COPY ./package.json ./package.json
-COPY ./bun.lock ./bun.lock
-COPY ./packages ./packages
-COPY ./apps/web ./apps/web
-
-RUN bun install
-
-RUN cd packages/db && bunx prisma generate
-
-# Build with DATABASE_URL explicitly set
-RUN cd apps/web && DATABASE_URL=${DATABASE_URL} npx next build
-
-# Production stage with Bun
 FROM oven/bun:latest
 
 WORKDIR /usr/app/src
 
-COPY --from=builder /usr/app/src/apps/web/.next ./apps/web/.next
-COPY --from=builder /usr/app/src/apps/web/public ./apps/web/public
-COPY --from=builder /usr/app/src/apps/web/package.json ./apps/web/package.json
-COPY --from=builder /usr/app/src/node_modules ./node_modules
-COPY --from=builder /usr/app/src/packages ./packages
+ARG DATABASE_URL
+
+RUN echo "Print DATABASE_URL $DATABASE_URL"
+COPY ./packages ./packages
+COPY ./bun.lock ./bun.lock
+
+COPY ./package.json ./package.json
+COPY ./turbo.json ./turbo.json
+
+COPY ./apps/web ./apps/web
+
+RUN bun install
+
+RUN bun run db:generate
+
+RUN DATABASE_URL=${DATABASE_URL} bun run build
 
 EXPOSE 3000
 
-WORKDIR /usr/app/src/apps/web
-
 CMD ["bun", "run", "start:web"]
+
+

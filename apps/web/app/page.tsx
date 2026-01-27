@@ -1,4 +1,4 @@
-// export const  dynamic = "force-dynamic";
+export const  dynamic = "force-dynamic";
 // or
 // export const revalidate = 60; // revalidate this page every 60 seconds
 import { prismaClient } from "db/client";

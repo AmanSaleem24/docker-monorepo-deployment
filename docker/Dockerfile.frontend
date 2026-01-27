@@ -3,6 +3,7 @@ FROM oven/bun:latest
 WORKDIR /usr/app/src
 
 ARG DATABASE_URL
+ENV DATABASE_URL=$DATABASE_URL
 
 RUN echo "Print DATABASE_URL $DATABASE_URL"
 COPY ./packages ./packages

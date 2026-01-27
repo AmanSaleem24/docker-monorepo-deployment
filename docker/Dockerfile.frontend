@@ -30,25 +30,24 @@ WORKDIR /usr/app/src
 ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
 
-# Copy workspace configuration
+# Copy workspace files
 COPY ./package.json ./package.json
 COPY ./bun.lock ./bun.lock
-COPY ./turbo.json ./turbo.json
 
-# Copy all shared packages that web depends on
+# Copy shared packages
 COPY ./packages ./packages
 
-# Copy the web app
+# Copy web app
 COPY ./apps/web ./apps/web
 
-# Install dependencies for the entire workspace
+# Install dependencies
 RUN bun install
 
 # Generate Prisma client
 RUN cd packages/db && bunx prisma generate
 
-# Build only the web app
-RUN bunx turbo run build --filter=web
+# Build Next.js directly
+RUN cd apps/web && bun run build
 
 EXPOSE 3000
 

@@ -1,24 +1,57 @@
+# FROM oven/bun:latest
+
+# WORKDIR /usr/app/src
+
+# ARG DATABASE_URL
+# COPY ./packages ./packages
+# COPY ./bun.lock ./bun.lock
+
+# COPY ./package.json ./package.json
+# COPY ./turbo.json ./turbo.json
+
+# COPY ./apps/web ./apps/web
+
+# RUN bun install
+
+# RUN bun run db:generate
+
+# RUN DATABASE_URL=${DATABASE_URL} bun run build
+
+# EXPOSE 3000
+
+# CMD ["bun", "run", "start:web"]
+
+
+
 FROM oven/bun:latest
 
 WORKDIR /usr/app/src
 
 ARG DATABASE_URL
-COPY ./packages ./packages
-COPY ./bun.lock ./bun.lock
+ENV DATABASE_URL=${DATABASE_URL}
 
+# Copy workspace configuration
 COPY ./package.json ./package.json
+COPY ./bun.lock ./bun.lock
 COPY ./turbo.json ./turbo.json
 
+# Copy all shared packages that web depends on
+COPY ./packages ./packages
+
+# Copy the web app
 COPY ./apps/web ./apps/web
 
+# Install dependencies for the entire workspace
 RUN bun install
 
-RUN bun run db:generate
+# Generate Prisma client
+RUN cd packages/db && bunx prisma generate
 
-RUN DATABASE_URL=${DATABASE_URL} bun run build
+# Build only the web app
+RUN bunx turbo run build --filter=web
 
 EXPOSE 3000
 
-CMD ["bun", "run", "start:web"]
+WORKDIR /usr/app/src/apps/web
 
-
+CMD ["bun", "run", "start"]

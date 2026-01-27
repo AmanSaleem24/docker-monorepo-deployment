@@ -40,6 +40,16 @@ COPY ./packages ./packages
 # Copy web app
 COPY ./apps/web ./apps/web
 
+# Quick DATABASE_URL check
+RUN echo "DATABASE_URL length: ${#DATABASE_URL}" && \
+    echo "DATABASE_URL starts with: ${DATABASE_URL:0:15}..." && \
+    if echo "$DATABASE_URL" | grep -qE '^(postgresql|postgres)://'; then \
+      echo "✅ DATABASE_URL format looks correct"; \
+    else \
+      echo "❌ ERROR: DATABASE_URL should start with postgresql:// or postgres://"; \
+      exit 1; \
+    fi
+
 # Install dependencies
 RUN bun install
 

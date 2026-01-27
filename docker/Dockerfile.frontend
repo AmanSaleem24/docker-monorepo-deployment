@@ -23,44 +23,46 @@
 
 
 
-FROM oven/bun:latest
+# Build stage with Node.js (avoids Bun crash)
+FROM node:20-slim AS builder
 
 WORKDIR /usr/app/src
 
 ARG DATABASE_URL
 ENV DATABASE_URL=${DATABASE_URL}
 
-# Copy workspace files
+# Install OpenSSL for Prisma
+RUN apt-get update -y && apt-get install -y openssl curl
+
+# Install Bun
+RUN curl -fsSL https://bun.sh/install | bash
+ENV PATH="/root/.bun/bin:${PATH}"
+
 COPY ./package.json ./package.json
 COPY ./bun.lock ./bun.lock
-
-# Copy shared packages
 COPY ./packages ./packages
-
-# Copy web app
 COPY ./apps/web ./apps/web
 
-# Quick DATABASE_URL check
-RUN echo "DATABASE_URL length: ${#DATABASE_URL}" && \
-    echo "DATABASE_URL starts with: ${DATABASE_URL:0:15}..." && \
-    if echo "$DATABASE_URL" | grep -qE '^(postgresql|postgres)://'; then \
-      echo "✅ DATABASE_URL format looks correct"; \
-    else \
-      echo "❌ ERROR: DATABASE_URL should start with postgresql:// or postgres://"; \
-      exit 1; \
-    fi
-
-# Install dependencies
 RUN bun install
 
-# Generate Prisma client
 RUN cd packages/db && bunx prisma generate
 
-# Build Next.js directly
-RUN cd apps/web && bun run build
+# Build with Node.js (more stable than Bun for Next.js builds)
+RUN cd apps/web && npx next build
+
+# Production stage with Bun
+FROM oven/bun:latest
+
+WORKDIR /usr/app/src
+
+COPY --from=builder /usr/app/src/apps/web/.next ./apps/web/.next
+COPY --from=builder /usr/app/src/apps/web/public ./apps/web/public
+COPY --from=builder /usr/app/src/apps/web/package.json ./apps/web/package.json
+COPY --from=builder /usr/app/src/node_modules ./node_modules
+COPY --from=builder /usr/app/src/packages ./packages
 
 EXPOSE 3000
 
 WORKDIR /usr/app/src/apps/web
 
-CMD ["bun", "run", "start"]
+CMD ["bun", "run", "start:web"]

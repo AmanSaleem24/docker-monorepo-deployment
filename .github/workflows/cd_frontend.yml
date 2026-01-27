@@ -20,11 +20,21 @@ jobs:
             with:
               context: .
               file: ./docker/Dockerfile.frontend
-              secrets: |
-                DATABASE_URL=${{ secrets.DATABASE_URL }}
+              build-args: |
+                DATABASE_URL="${{ secrets.DATABASE_URL }}"
               push: true
               tags: amansaleem24/todo-app-frontend:${{ github.sha }}
 
-            
+          # - name: Deploy to VM
+          #   uses: appleboy/ssh-action@v0.1.6
+          #   with:
+          #     host: ${{ secrets.VM_HOST }}
+          #     username: ${{ secrets.VM_USERNAME }}
+          #     key: ${{ secrets.VM_SSH_KEY }}
+          #     script: |
+          #       docker pull amansaleem24/todo-app-frontend:${{ github.sha }}
+          #       docker stop todo-frontend || true
+          #       docker rm todo-frontend || true
+          #       docker run -d --name todo-frontend -p 80:3000 amansaleem24/todo-app-frontend:${{ github.sha }} 
 
  

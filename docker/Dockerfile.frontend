@@ -48,8 +48,8 @@ RUN bun install
 
 RUN cd packages/db && bunx prisma generate
 
-# Build with Node.js (more stable than Bun for Next.js builds)
-RUN cd apps/web && npx next build
+# Build with DATABASE_URL explicitly set
+RUN cd apps/web && DATABASE_URL=${DATABASE_URL} npx next build
 
 # Production stage with Bun
 FROM oven/bun:latest

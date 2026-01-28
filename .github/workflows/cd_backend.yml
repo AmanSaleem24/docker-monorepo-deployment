@@ -23,10 +23,12 @@ jobs:
               push: true
               tags: amansaleem24/todo-app-backend:${{ github.sha }}
 
-          - name: Write SSH key
-            run: |
-                echo "${{ secrets.SSH_KEY_PEM }}" > /tmp/ssh_key.pem
-                chmod 600 /tmp/ssh_key.pem
+          - name: Setup SSH
+            uses: webfactory/ssh-agent@v0.9.0
+            with:
+              ssh-private-key: |
+                ${{ secrets.SSH_KEY_PEM }}
+
 
           - name: Deploy backend to VM
             uses: appleboy/ssh-action@v0.1.6
@@ -35,8 +37,7 @@ jobs:
               username: ubuntu
               key: /tmp/ssh_key.pem
               script: |
-                docker pull amansaleem24/todo-app-backend:${{ github.sha }}
-
+                docker pull ***/todo-app-backend:${{ github.sha }}
                 docker stop todo-backend || true
                 docker rm todo-backend || true
 
@@ -46,9 +47,9 @@ jobs:
                   -p 8080:8080 \
                   -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
                   -e NODE_ENV=production \
-                  amansaleem24/todo-app-backend:${{ github.sha }}
-
+                  ***/todo-app-backend:${{ github.sha }}
                 docker image prune -f
+
 
 
  

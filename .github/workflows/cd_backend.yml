@@ -36,6 +36,7 @@ jobs:
             with:
               host: ${{ secrets.VM_HOST }}
               username: ubuntu
+              use_ssh_agent: true
               script: |
                 docker pull YOUR_DOCKER_USERNAME/todo-app-backend:${{ github.sha }}
 

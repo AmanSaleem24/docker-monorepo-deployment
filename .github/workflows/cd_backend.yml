@@ -23,20 +23,12 @@ jobs:
               push: true
               tags: amansaleem24/todo-app-backend:${{ github.sha }}
 
-          - name: Setup SSH
-            uses: webfactory/ssh-agent@v0.9.0
-            with:
-              ssh-private-key: |
-                ${{ secrets.SSH_KEY_PEM }}
-
-
-
           - name: Deploy backend to EC2
             uses: appleboy/ssh-action@v0.1.6
             with:
               host: ${{ secrets.VM_HOST }}
               username: ubuntu
-              use_ssh_agent: true
+              key: ${{ secrets.SSH_KEY_PEM }}
               script: |
                 docker pull YOUR_DOCKER_USERNAME/todo-app-backend:${{ github.sha }}
 
@@ -52,6 +44,7 @@ jobs:
                   YOUR_DOCKER_USERNAME/todo-app-backend:${{ github.sha }}
 
                 docker image prune -f
+
 
 
 

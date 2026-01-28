@@ -23,12 +23,17 @@ jobs:
               push: true
               tags: amansaleem24/todo-app-backend:${{ github.sha }}
 
+          - name: Write SSH key
+            run: |
+                echo "${{ secrets.SSH_KEY_PEM }}" > /tmp/ssh_key.pem
+                chmod 600 /tmp/ssh_key.pem
+
           - name: Deploy backend to VM
             uses: appleboy/ssh-action@v0.1.6
             with:
               host: ${{ secrets.VM_HOST }}
-              username: ${{ secrets.VM_USERNAME }}
-              key: ${{ secrets.VM_SSH_KEY }}
+              username: ubuntu
+              key: /tmp/ssh_key.pem
               script: |
                 docker pull amansaleem24/todo-app-backend:${{ github.sha }}
 

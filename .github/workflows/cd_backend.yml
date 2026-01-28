@@ -23,6 +23,27 @@ jobs:
               push: true
               tags: amansaleem24/todo-app-backend:${{ github.sha }}
 
-            
+          - name: Deploy backend to VM
+            uses: appleboy/ssh-action@v0.1.6
+            with:
+              host: ${{ secrets.VM_HOST }}
+              username: ${{ secrets.VM_USERNAME }}
+              key: ${{ secrets.VM_SSH_KEY }}
+              script: |
+                docker pull amansaleem24/todo-app-backend:${{ github.sha }}
+
+                docker stop todo-backend || true
+                docker rm todo-backend || true
+
+                docker run -d \
+                  --name todo-backend \
+                  --restart unless-stopped \
+                  -p 8080:8080 \
+                  -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+                  -e NODE_ENV=production \
+                  amansaleem24/todo-app-backend:${{ github.sha }}
+
+                docker image prune -f
+
 
  

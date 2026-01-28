@@ -16,6 +16,7 @@ RUN bun run db:generate
 
 EXPOSE 8080
 
-CMD ["bun", "run", "start:backend"]
+CMD ["sh", "-c", "bun run db:migrate:deploy && bun run start:backend"]
+
 
 

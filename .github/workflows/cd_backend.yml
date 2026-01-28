@@ -30,14 +30,15 @@ jobs:
                 ${{ secrets.SSH_KEY_PEM }}
 
 
-          - name: Deploy backend to VM
+
+          - name: Deploy backend to EC2
             uses: appleboy/ssh-action@v0.1.6
             with:
               host: ${{ secrets.VM_HOST }}
               username: ubuntu
-              key: /tmp/ssh_key.pem
               script: |
-                docker pull ***/todo-app-backend:${{ github.sha }}
+                docker pull YOUR_DOCKER_USERNAME/todo-app-backend:${{ github.sha }}
+
                 docker stop todo-backend || true
                 docker rm todo-backend || true
 
@@ -47,8 +48,10 @@ jobs:
                   -p 8080:8080 \
                   -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
                   -e NODE_ENV=production \
-                  ***/todo-app-backend:${{ github.sha }}
+                  YOUR_DOCKER_USERNAME/todo-app-backend:${{ github.sha }}
+
                 docker image prune -f
+
 
 
 

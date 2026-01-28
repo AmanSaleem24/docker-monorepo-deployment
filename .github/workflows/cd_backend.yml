@@ -30,7 +30,7 @@ jobs:
               username: ubuntu
               key: ${{ secrets.SSH_KEY_PEM }}
               script: |
-                docker pull YOUR_DOCKER_USERNAME/todo-app-backend:${{ github.sha }}
+                docker pull amansaleem24/todo-app-backend:${{ github.sha }}
 
                 docker stop todo-backend || true
                 docker rm todo-backend || true

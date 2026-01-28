@@ -41,7 +41,7 @@ jobs:
                   -p 8080:8080 \
                   -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
                   -e NODE_ENV=production \
-                  YOUR_DOCKER_USERNAME/todo-app-backend:${{ github.sha }}
+                  amansaleem24/todo-app-backend:${{ github.sha }}
 
                 docker image prune -f
 
